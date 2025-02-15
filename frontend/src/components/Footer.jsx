@@ -6,7 +6,7 @@ const Footer = () => {
     <div className="md:mx-19=0">
       <div
         className="flex flex-col sm:grid grid-cols-[3fr_1fr_1fr]
-      gap-14 my-10 mt-0 text-sm"
+      gap-14 my-10 mt-40 text-sm"
       >
         <div>
           <img className="mb-5 w-30" src={assets.logo} alt="" />
