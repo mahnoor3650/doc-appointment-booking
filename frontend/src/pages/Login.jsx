@@ -20,6 +20,7 @@ const Login = () => {
         <p>
           Please {state === "Sign Up" ? "sign up" : "Login"} to book appointment
         </p>
+        {state === "Sign Up" &&
         <div className="w-full">
           <p>Full Name</p>
           <input
@@ -29,6 +30,7 @@ const Login = () => {
             onChange={(e) => setName(e.target.value)}
           />
         </div>
+}
         <div className="w-full">
           <p>Email</p>
           <input
@@ -50,10 +52,13 @@ const Login = () => {
         <button className="bg-primary text-white w-full py-2 rounded-md text-base">
           {state === "Sign Up" ? "Create Account" : "Login"}
         </button>
-        {state === "Sign UP" ? (
+        {state === "Sign Up" ? (
           <p>
             Already have an account?
-            <span className="text-primary underline cursor-pointer">
+            <span
+              onClick={() => setstate("Login")}
+              className="text-primary underline cursor-pointer"
+            >
               {" "}
               Login here
             </span>{" "}
@@ -61,7 +66,10 @@ const Login = () => {
         ) : (
           <p>
             Create a new account?{" "}
-            <span className="text-primary underline cursor-pointer">
+            <span
+              onClick={() => setstate("Sign Up")}
+              className="text-primary underline cursor-pointer"
+            >
               Click here
             </span>
           </p>
