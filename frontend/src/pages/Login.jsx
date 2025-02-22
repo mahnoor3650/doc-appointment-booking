@@ -1,8 +1,10 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { AppContext } from "../context/AppContext";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 const Login = () => {
+  const navigate = useNavigate()
   const [state, setstate] = useState("Sign Up");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,6 +19,7 @@ const Login = () => {
           email,
           password,
         });
+           console.log("data in sign up", data);
         if (data.success) {
           localStorage.setItem("token", data.token);
           setToken(data.token);
@@ -28,17 +31,25 @@ const Login = () => {
           email,
           password,
         });
+         console.log("data in login", data);
         if (data.success) {
           localStorage.setItem("token", data.token);
           setToken(data.token);
         } else {
+          console.log("in else")
           toast.error(data.message);
         }
       }
     } catch (error) {
+       console.log("in catch");
       toast.error(error.message);
     }
   };
+  useEffect(()=>{
+    if(token){
+      navigate('/');
+    }
+  },[token])
   return (
     <form onSubmit={onSubmitHandler} className="min-h-[80vh] flex items-center">
       <div
