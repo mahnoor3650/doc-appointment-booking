@@ -1,10 +1,15 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { assets } from "../assets/assets_frontend/assets";
 import { NavLink, useNavigate } from "react-router-dom";
+import { AppContext } from "../context/AppContext";
 const Navbar = () => {
   const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
-  const [token, setToken] = useState(true);
+  const { token, setToken } = useContext(AppContext);
+  const logout =()=>{
+    setToken(false);
+    localStorage.removeItem('token')
+  }
   return (
     <div className="flex items-center justify-between text-sm py-4 mb-5 border-b border-b-gray-400">
       <img
@@ -52,7 +57,7 @@ const Navbar = () => {
                 </p>
                 <p
                   className="hover:text-black cursor-pointer"
-                  onClick={() => setToken(false)}
+                  onClick={ logout}
                 >
                   Logout
                 </p>
@@ -91,25 +96,13 @@ const Navbar = () => {
             <NavLink onClick={() => setShowMenu(false)} to="/">
               <p className="px-4 py-2 rounded inline-block">Home</p>
             </NavLink>
-            <NavLink
-           
-              onClick={() => setShowMenu(false)}
-              to="/doctors"
-            >
+            <NavLink onClick={() => setShowMenu(false)} to="/doctors">
               <p className="px-4 py-2 rounded inline-block">All Doctors</p>
             </NavLink>
-            <NavLink
-           
-              onClick={() => setShowMenu(false)}
-              to="/about"
-            >
+            <NavLink onClick={() => setShowMenu(false)} to="/about">
               <p className="px-4 py-2 rounded inline-block">About</p>
             </NavLink>
-            <NavLink
-          
-              onClick={() => setShowMenu(false)}
-              to="/contact"
-            >
+            <NavLink onClick={() => setShowMenu(false)} to="/contact">
               <p className="px-4 py-2 rounded inline-block">Contact</p>
             </NavLink>
           </ul>
