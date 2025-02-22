@@ -22,7 +22,24 @@ const AdimContextProvider = (props) => {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(data.message);
+      toast.error(error);
+    }
+  };
+  const changeAvailabilty = async (docId) => {
+    try {
+      const { data } = await axios.post(
+        backendUrl + "/api/admin/change-availabilty",
+        { docId },
+        { headers: { aToken } }
+      );
+      if (data.success) {
+        toast.success(data.message);
+        getALldoctors();
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error);
     }
   };
   const value = {
@@ -31,6 +48,7 @@ const AdimContextProvider = (props) => {
     backendUrl,
     doctors,
     getALldoctors,
+    changeAvailabilty,
   };
 
   return (
