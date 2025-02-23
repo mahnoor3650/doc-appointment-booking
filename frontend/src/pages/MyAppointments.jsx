@@ -25,6 +25,25 @@ const MyAppointments = () => {
       toast.error(error.message)
     }
   }
+  const cancelAppointmnets= async(appointmentId)=>{
+    try {
+     
+      const { data } = await axios.post(
+        backendUrl + "/api/user//cancel-appointment",
+        {appointmentId},
+        {headers:{token}}
+      );
+      if(data.success){
+        toast.success(data.message);
+        getAppointentData()
+      }else{
+        toast.error(data.message);
+      }
+      
+    } catch (error) {
+      toast.error(error.message)
+    }
+  }
   useEffect(()=>{
     if(token){getAppointentData()}},[])
   return (
@@ -63,12 +82,20 @@ const MyAppointments = () => {
             </div>
             <div></div>
             <div className="flex flex-col gap-2 justify-end">
-              <button className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-primary hover:text-white transition-all duration-300">
-                Pay Online
-              </button>
-              <button className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-red-600 hover:text-white transition-all duration-300">
-                Cancel appointment
-              </button>
+              {!item.cancelled && (
+                <button className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-primary hover:text-white transition-all duration-300">
+                  Pay Online
+                </button>
+              )}
+              {!item.cancelled && (
+                <button
+                  onClick={() => cancelAppointmnets(item._id)}
+                  className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-red-600 hover:text-white transition-all duration-300"
+                >
+                  Cancel appointment
+                </button>
+              )}
+              {item.cancelled && <button className='sm:min-w-48 py-2 border border-red-500 rounded text-red-500'>Appointment Cancelled</button>}
             </div>
           </div>
         ))}
