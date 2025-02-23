@@ -110,7 +110,7 @@ const bookAppointment = async (req, res) => {
     const { userId, docId, slotDate, slotTime } = req.body;
     const docData = await doctorModel.findById(docId).select("-password");
     if (!docData.available) {
-      return res.json({ success: false, message: "Doctor not available" });
+      return res.json({ success: false, message: "Doctor not available1" });
     }
     let slots_booked = docData.slots_booked;
 
@@ -149,10 +149,25 @@ const bookAppointment = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
+
+
+// Api to get user Appointment
+const getAppointmentList = async(req,res)=>{
+  try {
+    const {userId}= req.body;
+    const appointments = await appointmentModel.find({userId})
+     res.json({ success: true, appointments });
+  } catch (error) {
+     res.json({ success: false, message: error.message });
+  }
+}
+
+
 export {
   registerUser,
   loginUser,
   getUserProfile,
   updateUserProfle,
   bookAppointment,
+  getAppointmentList,
 };

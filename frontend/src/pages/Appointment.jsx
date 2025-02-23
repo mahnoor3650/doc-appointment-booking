@@ -10,13 +10,13 @@ const Appointment = () => {
   const { docId } = useParams();
   const { doctors, currencysymbol, backendUrl, token, getDoctorsData } =
     useContext(AppContext);
+   
   const navigate = useNavigate();
   const daysOfWeek = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
   const [docInfo, setDocInfo] = useState(null);
   const [docSlots, setDocSlots] = useState([]);
   const [slotIndex, setSlotIndex] = useState(0);
   const [slotTime, setSlotTime] = useState("");
-
   const fecchDocInfo = async () => {
     const doc_info = doctors.find((doc) => doc._id === docId);
     setDocInfo(doc_info);
@@ -48,10 +48,24 @@ const Appointment = () => {
           hour: "2-digit",
           minute: "2-digit",
         });
-        //add slots to array
-        timeSlots.push({ datetime: new Date(currDate), time: formattedtime });
+        let day = currDate.getDate();
+        let month = currDate.getMonth() + 1;
+        let year = currDate.getFullYear();
 
-        //imcrement time by 30 minutes
+        const slotDate = day + "_" + month + "_" + year;
+        const slotTime = formattedtime;
+        
+        const isSlotAvailable = docInfo &&
+          docInfo.slots_booked[slotDate] &&
+          docInfo.slots_booked[slotDate].includes(slotTime)
+            ? false
+            : true;
+        if(isSlotAvailable){
+          //add slots to array
+          timeSlots.push({ datetime: new Date(currDate), time: formattedtime });
+        }
+       
+        //increment time by 30 minutes
         currDate.setMinutes(currDate.getMinutes() + 30);
       }
       setDocSlots((pre) => [...pre, timeSlots]);
@@ -94,7 +108,6 @@ const Appointment = () => {
     getAvaiableSlot();
   }, [docInfo]);
   useEffect(() => {
-    console.log(docSlots);
   }, [docSlots]);
   return (
     docInfo && (
