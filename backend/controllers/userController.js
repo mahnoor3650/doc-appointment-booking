@@ -5,6 +5,8 @@ import jwt from "jsonwebtoken";
 import { v2 as cloudinary } from "cloudinary";
 import doctorModel from "../models/doctorModel.js";
 import appointmentModel from "../models/appointmentModel.js";
+import razorpay from "razorpay";
+
 // API to register user
 const registerUser = async (req, res) => {
   try {
@@ -150,41 +152,89 @@ const bookAppointment = async (req, res) => {
   }
 };
 
-
 // API to get user Appointment
-const getAppointmentList = async(req,res)=>{
+const getAppointmentList = async (req, res) => {
   try {
-    const {userId}= req.body;
-    const appointments = await appointmentModel.find({userId})
-     res.json({ success: true, appointments });
+    const { userId } = req.body;
+    const appointments = await appointmentModel.find({ userId });
+    res.json({ success: true, appointments });
   } catch (error) {
-     res.json({ success: false, message: error.message });
+    res.json({ success: false, message: error.message });
   }
-}
-
+};
 
 // API for cancel Appointment
-const cancelAppointment= async (req,res)=>{
+const cancelAppointment = async (req, res) => {
   try {
-    const {userId, appointmentId}= req.body;
-    console.log("userId",userId)
+    const { userId, appointmentId } = req.body;
+ 
     const appointmentData = await appointmentModel.findById(appointmentId);
-     console.log("appointmentData", appointmentData);
-      console.log("appointmentData.userid", appointmentData.userId);
+  
     if (appointmentData.userId !== userId) {
       return res.json({ success: false, message: "Unauthorized Action" });
     }
-    await appointmentModel.findByIdAndUpdate(appointmentId, { cancelled :true});
-    const {docId, slotDate,slotTime}= appointmentData;
-    const doctoeData= await doctorModel.findById(docId);
+    await appointmentModel.findByIdAndUpdate(appointmentId, {
+      cancelled: true,
+    });
+    const { docId, slotDate, slotTime } = appointmentData;
+    const doctoeData = await doctorModel.findById(docId);
     let slots_booked = doctoeData.slots_booked;
-    slots_booked[slotDate] = slots_booked[slotDate].filter(e=> e!== slotTime);
+    slots_booked[slotDate] = slots_booked[slotDate].filter(
+      (e) => e !== slotTime
+    );
     await doctorModel.findByIdAndUpdate(docId, { slots_booked });
     res.json({ success: true, message: "Appointmnet cancelled" });
   } catch (error) {
-     res.json({ success: false, message: error.message });
+    res.json({ success: false, message: error.message });
   }
-}
+};
+
+const razorpayInstance = new razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secrect: process.env.RAZORPAY_KEY_SECRECT,
+});
+// API to make Online Payment
+const paymentRazorPay = async (req, res) => {
+  try {
+    const { appointmentId } = req.body;
+    const appointmentData = await appointmentModel.findById(appointmentId);
+    if (!appointmentData || appointmentData.cancelled) {
+      res.json({
+        success: false,
+        message: "Appointmnet cancelled ot not found",
+      });
+    }
+
+    //crrtaing opyions for razor payment
+    const options = {
+      amount: appointmentData.amount * 100,
+      currency: process.env.CURRENCY,
+      receipt: appointmentId,
+    };
+
+    const order = await razorpayInstance.orders.create(options);
+    res.json({ success: true, order });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+//APi to verify razorpayment
+const verifyRazorPay = async (req, res) => {
+  try {
+    const { razorpay_order_id } = req.body;
+    const orderInfo = await razorpayInstance.orders.fetch(razorpay_order_id);
+    if(orderInfo.status === 'paid'){
+      await appointmentModel.findByIdAndUpdate(orderInfo.receipt, {payment:true})
+         res.json({ success: true, message: 'Payment Succesfull' });
+    }
+    else{
+      res.json({ success: false, message: "Payment Failed" });
+    }
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
 export {
   registerUser,
   loginUser,
@@ -193,4 +243,6 @@ export {
   bookAppointment,
   getAppointmentList,
   cancelAppointment,
+  paymentRazorPay,
+  verifyRazorPay,
 };

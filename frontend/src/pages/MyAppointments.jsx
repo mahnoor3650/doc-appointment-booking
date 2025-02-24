@@ -2,10 +2,13 @@ import React, { useContext, useEffect, useState } from 'react'
 import {AppContext} from "../context/AppContext"
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 const MyAppointments = () => {
+  const navigate = useNavigate()
   const { backendUrl, token } = useContext(AppContext);
   const [appointments ,setAppointments] = useState([])
   const months = ["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  
   const slotDateFormat=(slotDate)=>{
     const dateArray = slotDate.split('_');
     return dateArray[0] +" "+ months[Number(dateArray[1])]+" "+dateArray[2]
@@ -29,13 +32,14 @@ const MyAppointments = () => {
     try {
      
       const { data } = await axios.post(
-        backendUrl + "/api/user//cancel-appointment",
+        backendUrl + "/api/user/cancel-appointment",
         {appointmentId},
         {headers:{token}}
       );
       if(data.success){
         toast.success(data.message);
         getAppointentData()
+   
       }else{
         toast.error(data.message);
       }
@@ -44,6 +48,52 @@ const MyAppointments = () => {
       toast.error(error.message)
     }
   }
+const initPay=(order)=>{
+const options = {
+  key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+  amount: order.amount,
+  currecncy: order.currency,
+  name: "Appointmnet Paymnet",
+  description: "Appointmnet Paymnet",
+  order_id:order.id,
+  receipt:order.receipt,
+  handler:async(response)=>{
+    try {
+      const { data } = await axios.post(
+        backendUrl + "/api/user/verifyRazorPay",
+        { response },
+        { headers: { token } }
+      );
+      if (data.success) {
+      getAppointentData();
+      navigate("/my-appointments");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  }
+};
+const rzp=  new window.Razorpay(option)
+rzp.open()
+}
+   const AppointmnetPay = async (appointmentId) => {
+     try {
+       const { data } = await axios.post(
+         backendUrl + "/api/user/pay-online",
+         { appointmentId },
+         { headers: { token } }
+       );
+       if (data.success) {
+            initPay(data.orders);
+       } else {
+         toast.error(data.message);
+       }
+     } catch (error) {
+       toast.error(error.message);
+     }
+   };
   useEffect(()=>{
     if(token){getAppointentData()}},[])
   return (
@@ -82,8 +132,16 @@ const MyAppointments = () => {
             </div>
             <div></div>
             <div className="flex flex-col gap-2 justify-end">
-              {!item.cancelled && (
-                <button className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-primary hover:text-white transition-all duration-300">
+              {!item.cancelled && item.payment && (
+                <button className=" text-stone-500  sm:min-w-48 py-2 border border-gray-200 rounded  bg-indigo-50">
+                  Paid
+                </button>
+              )}
+              {!item.cancelled && !item.payment &&(
+                <button
+                  onClick={() => AppointmnetPay(item._id)}
+                  className="text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-primary hover:text-white transition-all duration-300"
+                >
                   Pay Online
                 </button>
               )}
@@ -95,7 +153,11 @@ const MyAppointments = () => {
                   Cancel appointment
                 </button>
               )}
-              {item.cancelled && <button className='sm:min-w-48 py-2 border border-red-500 rounded text-red-500'>Appointment Cancelled</button>}
+              {item.cancelled && (
+                <button className="sm:min-w-48 py-2 border border-red-500 rounded text-red-500">
+                  Appointment Cancelled
+                </button>
+              )}
             </div>
           </div>
         ))}
