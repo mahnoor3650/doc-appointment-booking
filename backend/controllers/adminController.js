@@ -4,6 +4,7 @@ import bycrypt from 'bcrypt';
 import doctorModel from '../models/doctorModel.js'
 import jwt from 'jsonwebtoken'
 import appointmentModel from "../models/appointmentModel.js";
+import userModel from "../models/userModel.js";
 //API for adding doctor
 
 const addDoctor=async(req,res)=>{
@@ -137,6 +138,24 @@ const appointmentcancel = async (req, res) => {
   }
 };
 
+//API to get Dashborad data for admin panel
+const adminDashboard = async(req,res)=>{
+  try {
+    const doctors = await doctorModel.find({});
+    const users = await userModel.find({});
+    const appointments = await appointmentModel.find({})
+    const dashData = {
+      doctors: doctors.length,
+      paitents: users.length,
+      appointments: appointments.length,
+      latestAppointments: appointments.reverse().slice(0,5)
+    };
+     res.json({ success: true, dashData });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+}
+
 
 
 export {
@@ -145,4 +164,5 @@ export {
   allDoctors,
   appointmentsAdmin,
   appointmentcancel,
+  adminDashboard,
 };

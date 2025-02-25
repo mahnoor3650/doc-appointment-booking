@@ -9,6 +9,7 @@ const AdimContextProvider = (props) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [doctors, setDoctors] = useState([]);
   const [appointmnets, setAppointmnets] = useState([]);
+  const [dashData, setDashData] = useState(false);
   const getALldoctors = async () => {
     try {
       const { data } = await axios.post(
@@ -43,40 +44,54 @@ const AdimContextProvider = (props) => {
       toast.error(error);
     }
   };
-   const getAllAppointments = async () => {
+  const getAllAppointments = async () => {
+    try {
+      const { data } = await axios.get(backendUrl + "/api/admin/appointmnets", {
+        headers: { aToken },
+      });
+      if (data.success) {
+        setAppointmnets(data.appointments);
+      } else {
+        toast.error(data.message);
+        console.log(data.message);
+      }
+    } catch (error) {
+      console.log(error.message);
+      toast.error(error);
+    }
+  };
+  const cancelAppointmnet = async (appointmentId) => {
+    try {
+      const { data } = await axios.post(
+        backendUrl + "/api/admin/cancel-appointment",
+        { appointmentId },
+        { headers: { aToken } }
+      );
+      if (data.success) {
+        toast.success(data.message);
+        getAllAppointments();
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error);
+    }
+  };
+   const getDashboradData = async () => {
      try {
-       const { data } = await axios.get(
-         backendUrl + "/api/admin/appointmnets",
-         { headers: { aToken } }
-       );
+       const { data } = await axios.get(backendUrl + "/api/admin/dashboard", {
+         headers: { aToken },
+       });
        if (data.success) {
-         setAppointmnets(data.appointments);
+         setDashData(data.dashData);
        } else {
          toast.error(data.message);
-             console.log(data.message);
        }
      } catch (error) {
-      console.log(error.message)
-       toast.error(error);
+       console.log(error);
+       toast.error(error.message);
      }
    };
-     const cancelAppointmnet = async (appointmentId) => {
-       try {
-         const { data } = await axios.post(
-           backendUrl + "/api/admin/cancel-appointment",
-           { appointmentId },
-           { headers: { aToken } }
-         );
-         if (data.success) {
-           toast.success(data.message);
-           getAllAppointments();
-         } else {
-           toast.error(data.message);
-         }
-       } catch (error) {
-         toast.error(error);
-       }
-     };
   const value = {
     aToken,
     setaToken,
@@ -88,6 +103,8 @@ const AdimContextProvider = (props) => {
     getAllAppointments,
     setAppointmnets,
     cancelAppointmnet,
+    dashData,
+    getDashboradData,
   };
 
   return (
