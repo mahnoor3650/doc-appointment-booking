@@ -144,7 +144,7 @@ const updateDoctorProfle = async (req, res) => {
   
     await doctorModel.findByIdAndUpdate(docId, {
       fee,
-      address: JSON.parse(address),
+      address,
       available
     });
   

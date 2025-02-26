@@ -88,7 +88,7 @@ const DoctorContextProvider = (props) => {
          headers: { dToken },
        });
        if (data.success) {
-         setProfileData(data.dashData);
+         setProfileData(data.profileData);
        } else {
          toast.error(data.message);
        }
@@ -107,7 +107,7 @@ const DoctorContextProvider = (props) => {
     completeAppointmnet,
     dashData,
     getDashboradData,
-    profileData,
+    profileData,setProfileData,
     getProfileData
   };
   return (
