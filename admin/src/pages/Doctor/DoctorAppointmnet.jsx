@@ -64,9 +64,9 @@ const DoctorAppointmnet = () => {
               {item.amount}
             </p>
             {item.cancelled ? (
-              <p>cancelled</p>
+              <p className="text-red-400 text-xs font-medium">cancelled</p>
             ) : item.isCompleted ? (
-              <p>Completed</p>
+              <p className="text-green-500 text-xs font-medium">Completed</p>
             ) : (
               <div className="flex">
                 <img
